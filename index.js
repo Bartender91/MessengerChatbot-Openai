@@ -4,7 +4,7 @@ const fs = require("fs");
 login(
   { appState: JSON.parse(fs.readFileSync("session.json", "utf8")) },
   (err, api) => {
-    if (err) return console.error(err);
+    if (err) return console.error("Login failed:", err);
 
     api.setOptions({
       logLevel: "silent",
@@ -14,11 +14,11 @@ login(
       autoMarkRead: true,
       selfListen: false,
       online: true,
-      proxy: "http://159.255.188.134:41258",
+      proxy: "http://159.255.188.134:41258", // Replace with your own proxy if needed
     });
 
     api.listenMqtt(async (err, event) => {
-      if (err) return console.error(err);
+      if (err) return console.error("Error in event listener:", err);
 
       api.markAsReadAll(() => {});
 
@@ -27,11 +27,17 @@ login(
         case "message_reply":
           if (event.body === "ping") {
             api.sendMessage("Pong!", event.threadID);
+          } else if (event.body.toLowerCase() === "hello") {
+            api.sendMessage("Hi there! How can I help you?", event.threadID);
+          } else if (event.body.toLowerCase() === "joke") {
+            api.sendMessage("Why don’t scientists trust atoms? Because they make up everything!", event.threadID);
           }
-            break;
+          break;
+        
         case "event":
-            break;
+          // Add other event handling here if needed
+          break;
       }
     });
-  },
+  }
 );
